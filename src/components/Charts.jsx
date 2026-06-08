@@ -3,7 +3,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell
 } from 'recharts'
-import { format, parseISO, startOfMonth, eachDayOfInterval, subDays } from 'date-fns'
+import { format, parseISO, subDays } from 'date-fns'
 
 const COLORS_EXP = ['#a3e635', '#f85149', '#38bdf8', '#fb923c', '#c084fc', '#34d399']
 
@@ -12,7 +12,8 @@ const CustomTooltip = ({ active, payload, label }) => {
   return (
     <div style={{
       background: 'var(--bg-card2)', border: '1px solid var(--border)',
-      borderRadius: 10, padding: '10px 14px', fontFamily: 'var(--font-mono)', fontSize: 12
+      borderRadius: 10, padding: '10px 14px',
+      fontFamily: 'var(--font-mono)', fontSize: 12
     }}>
       <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
       {payload.map((p, i) => (
@@ -26,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function Charts({ transactions }) {
   const last30 = useMemo(() => {
-    const days = Array.from({ length: 30 }, (_, i) => {
+    return Array.from({ length: 30 }, (_, i) => {
       const d = subDays(new Date(), 29 - i)
       const key = format(d, 'yyyy-MM-dd')
       const dayTxs = transactions.filter(t => t.date === key)
@@ -36,7 +37,6 @@ export default function Charts({ transactions }) {
         expense: dayTxs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0),
       }
     })
-    return days
   }, [transactions])
 
   const categoryData = useMemo(() => {
@@ -55,14 +55,15 @@ export default function Charts({ transactions }) {
   }
 
   const labelStyle = {
-    fontSize: 12, color: 'var(--text-secondary)',
-    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 18, display: 'block'
+    fontSize: 11, color: 'var(--text-secondary)',
+    letterSpacing: '0.08em', textTransform: 'uppercase',
+    marginBottom: 18, display: 'block'
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-      {/* Area Chart */}
-      <div style={{ ...cardStyle, gridColumn: '1 / -1' }}>
+    <div className="charts-grid">
+      {/* Area Chart — full width */}
+      <div style={{ ...cardStyle }} className="full-width">
         <span style={labelStyle}>30-Day Cash Flow</span>
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={last30} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
@@ -77,9 +78,11 @@ export default function Charts({ transactions }) {
               </linearGradient>
             </defs>
             <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: '#484f58', fontSize: 10, fontFamily: 'DM Mono' }}
+            <XAxis dataKey="date"
+              tick={{ fill: '#484f58', fontSize: 10, fontFamily: 'DM Mono' }}
               tickLine={false} axisLine={false} interval={4} />
-            <YAxis tick={{ fill: '#484f58', fontSize: 10, fontFamily: 'DM Mono' }}
+            <YAxis
+              tick={{ fill: '#484f58', fontSize: 10, fontFamily: 'DM Mono' }}
               tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Area type="monotone" dataKey="income" stroke="#a3e635" strokeWidth={2}
@@ -94,9 +97,13 @@ export default function Charts({ transactions }) {
       <div style={cardStyle}>
         <span style={labelStyle}>Monthly Bars</span>
         <ResponsiveContainer width="100%" height={160}>
-          <BarChart data={last30.filter((_, i) => i % 3 === 0)} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <BarChart
+            data={last30.filter((_, i) => i % 3 === 0)}
+            margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+          >
             <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: '#484f58', fontSize: 9, fontFamily: 'DM Mono' }}
+            <XAxis dataKey="date"
+              tick={{ fill: '#484f58', fontSize: 9, fontFamily: 'DM Mono' }}
               tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="income" fill="#a3e635" radius={[4, 4, 0, 0]} name="Income" />
@@ -109,14 +116,17 @@ export default function Charts({ transactions }) {
       <div style={cardStyle}>
         <span style={labelStyle}>Expense by Category</span>
         {categoryData.length === 0 ? (
-          <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+          <div style={{
+            height: 160, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13
+          }}>
             No expense data
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={160}>
             <PieChart>
-              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={45} outerRadius={70}
-                paddingAngle={3} dataKey="value">
+              <Pie data={categoryData} cx="50%" cy="50%"
+                innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
                 {categoryData.map((_, i) => (
                   <Cell key={i} fill={COLORS_EXP[i % COLORS_EXP.length]} />
                 ))}
@@ -127,8 +137,16 @@ export default function Charts({ transactions }) {
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px', marginTop: 8 }}>
           {categoryData.map((c, i) => (
-            <span key={i} style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: COLORS_EXP[i % COLORS_EXP.length], display: 'inline-block' }} />
+            <span key={i} style={{
+              fontSize: 11, color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-mono)',
+              display: 'flex', alignItems: 'center', gap: 5
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: COLORS_EXP[i % COLORS_EXP.length],
+                display: 'inline-block', flexShrink: 0
+              }} />
               {c.name}
             </span>
           ))}

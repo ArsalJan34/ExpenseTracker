@@ -4,21 +4,21 @@ const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
 
 export default function StatsCard({ label, value, trend, type }) {
-  const isPositive = type === 'income' || type === 'balance'
   const isNegative = type === 'expense'
   const color = isNegative ? 'var(--red)' : 'var(--accent)'
   const glow = isNegative ? 'var(--red-glow)' : 'var(--accent-glow)'
 
   return (
-    <div style={{
-      background: 'var(--bg-card)',
-      border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
-      padding: '20px 22px',
-      position: 'relative',
-      overflow: 'hidden',
-      transition: 'border-color 0.2s',
-    }}
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius)',
+        padding: '20px 22px',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'border-color 0.2s',
+      }}
       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-hover)'}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
     >
@@ -31,9 +31,13 @@ export default function StatsCard({ label, value, trend, type }) {
         transform: 'translate(20px, -20px)'
       }} />
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', marginBottom: 12
       }}>
-        <span style={{ fontSize: 12, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        <span style={{
+          fontSize: 11, color: 'var(--text-secondary)',
+          letterSpacing: '0.08em', textTransform: 'uppercase'
+        }}>
           {label}
         </span>
         {trend !== undefined && (
@@ -48,8 +52,12 @@ export default function StatsCard({ label, value, trend, type }) {
         )}
       </div>
       <div style={{
-        fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em',
-        fontFamily: 'var(--font-mono)', color
+        fontSize: 'clamp(20px, 4vw, 28px)',
+        fontWeight: 700,
+        letterSpacing: '-0.02em',
+        fontFamily: 'var(--font-mono)',
+        color,
+        wordBreak: 'break-all'
       }}>
         {fmt(value)}
       </div>
